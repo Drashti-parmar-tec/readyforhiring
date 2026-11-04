@@ -11,7 +11,7 @@
 - **Date last updated:** 2026-11-05
 - **Current phase:** Phase 0 — Setup
 - **Last thing finished:** Initial Git commit successfully pushed to GitHub (2df04f5).
-- **Next step:** Commit PROGRESS.md, then begin Phase 1 — Backend skeleton.
+- **Next step:** - **Next step:** Begin Phase 1 — Backend skeleton..
 - **Blocked by:** Nothing.
 
 
