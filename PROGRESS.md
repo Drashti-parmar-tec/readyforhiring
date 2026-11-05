@@ -9,10 +9,11 @@
 ## Current status
 
 - **Date last updated:** 2026-11-05
-- **Current phase:** Phase 0 — Setup
-- **Last thing finished:** Initial Git commit successfully pushed to GitHub (2df04f5).
-- **Next step:** - **Next step:** Begin Phase 1 — Backend skeleton..
+- **Current phase:** Phase 1 — Backend skeleton + early deploy
+- **Last thing finished:** Created and tested FastAPI health endpoint, Swagger documentation, and automated Pytest test. Commit: 4bbdd92.
+- **Next step:** Deploy the backend to Render (free).
 - **Blocked by:** Nothing.
+
 
 
 ---
@@ -30,9 +31,11 @@ Tick a box only when the step **works** and is **committed**.
 - [x] First commit pushed to GitHub
 
 ### Phase 1 — Backend skeleton + early deploy
-- [ ] FastAPI app with `GET /health`
-- [ ] Run locally and open `/docs`
-- [ ] Add `ruff` and run `uv run ruff check --fix`
+
+- [x] FastAPI app with `GET /health`
+- [x] Run locally and open `/docs`
+- [x] Add `ruff` and run `uv run ruff check --fix`
+- [x] Add automated health endpoint test with Pytest
 - [ ] Deploy backend to Render (free)
 - [ ] `/health` works on the Render link
 
