@@ -5,13 +5,12 @@
 
 ---
 
-
 ## Current status
 
 - **Date last updated:** 2026-11-05
-- **Current phase:** Phase 1 — Backend skeleton + early deploy
-- **Last thing finished:** Created and tested FastAPI health endpoint, Swagger documentation, and automated Pytest test. Commit: 4bbdd92.
-- **Next step:** Deploy the backend to Render (free).
+- **Current phase:** Phase 2 — Groq connection completed
+- **Last thing finished:** Groq API integration, real API test, rate-limit retry, and automated retry test. All quality checks passed.
+- **Next step:** Phase 3 — Neon PostgreSQL database setup.
 - **Blocked by:** Nothing.
 
 
@@ -36,14 +35,16 @@ Tick a box only when the step **works** and is **committed**.
 - [x] Run locally and open `/docs`
 - [x] Add `ruff` and run `uv run ruff check --fix`
 - [x] Add automated health endpoint test with Pytest
-- [ ] Deploy backend to Render (free)
-- [ ] `/health` works on the Render link
+- [x] Deploy backend to Render (free)
+- [x] `/health` works on the Render link
 
 ### Phase 2 — Groq connection
-- [ ] Get free Groq API key and save it in `backend/.env`
-- [ ] `config.py` reads environment variables
-- [ ] `groq_client.py` makes one test chat call
-- [ ] Retry on rate-limit error
+
+- [x] Get free Groq API key and save it in `backend/.env`
+- [x] `config.py` reads environment variables
+- [x] `groq_client.py` makes one test chat call
+- [x] Retry on rate-limit error
+- [x] Automated retry test passes
 
 ### Phase 3 — Database
 - [ ] Create Neon project and copy `DATABASE_URL`
@@ -107,8 +108,8 @@ Tick a box only when the step **works** and is **committed**.
 
 ## Decisions log
 
-| Date | Decision | Why |
-|---|---|---|
+| Date    | Decision               | Why |
+|---      |---                     |---  |
 | (start) | FastAPI + React (Vite) | Simple for beginners, clear to explain |
 | (start) | Groq for LLM and Whisper | Free tier, fast |
 | (start) | Neon Postgres, not SQLite | Render free disk is wiped on restart |
@@ -128,8 +129,31 @@ Tick a box only when the step **works** and is **committed**.
 
 ## Session log
 
-### Session 1
-- Goal:
+### Session 1 — Project Setup and Backend Foundation
+- Goal: Initialize ReadyForHiring and establish the backend foundation.
 - Done:
+  - Created GitHub repository `readyforhiring`.
+  - Set up project folders for backend and frontend.
+  - Installed and configured Python 3.12, `uv`, and Git.
+  - Created backend `pyproject.toml` and dependency configuration.
+  - Added `.gitignore` to protect environment files and generated folders.
+  - Created FastAPI application.
+  - Implemented `GET /health` endpoint.
+  - Configured Swagger documentation at `/docs`.
+  - Added automated health endpoint test using Pytest.
+  - Configured Ruff for code quality.
+  - Deployed backend to Render free service.
+  - Verified the deployed `/health` endpoint successfully.
+  - Pushed backend foundation to GitHub.
 - Not done:
-- Next:
+  - Groq integration.
+  - Database setup.
+  - Frontend development.
+  - AI feature implementation.
+- Next: Configure Groq API and implement the AI connection.
+
+### Session 2 — 2026-11-05
+- Goal: Complete Groq integration.
+- Done: Configured Groq, tested a real API request, implemented rate-limit retry, added automated retry test. Ruff checks passed; Pytest: 2 passed.
+- Not done: Database setup.
+- Next: Phase 3 — Neon PostgreSQL.
