@@ -1,0 +1,291 @@
+
+{
+  "careers": [
+    {
+      "id": "software-developer",
+      "title": "Software Developer",
+      "description": "Designs, develops, tests and maintains software applications.",
+      "interests": [
+        "programming",
+        "problem solving",
+        "building applications",
+        "technology"
+      ],
+      "technical_skills": [
+        "Python",
+        "Java",
+        "JavaScript",
+        "Data Structures",
+        "Algorithms",
+        "Database Management"
+      ],
+      "soft_skills": [
+        "Logical thinking",
+        "Problem solving",
+        "Teamwork",
+        "Communication"
+      ],
+      "tools": [
+        "VS Code",
+        "Git",
+        "GitHub",
+        "Postman"
+      ],
+      "beginner_projects": [
+        "Task Management Application",
+        "Library Management System",
+        "Personal Portfolio Website"
+      ]
+    },
+    {
+      "id": "data-analyst",
+      "title": "Data Analyst",
+      "description": "Collects, cleans, analyzes and visualizes data to help organizations make decisions.",
+      "interests": [
+        "data",
+        "statistics",
+        "finding patterns",
+        "business problem solving"
+      ],
+      "technical_skills": [
+        "SQL",
+        "Python",
+        "Excel",
+        "Statistics",
+        "Data Cleaning",
+        "Data Visualization"
+      ],
+      "soft_skills": [
+        "Analytical thinking",
+        "Attention to detail",
+        "Communication",
+        "Critical thinking"
+      ],
+      "tools": [
+        "Power BI",
+        "Tableau",
+        "Pandas",
+        "Jupyter Notebook"
+      ],
+      "beginner_projects": [
+        "Sales Analysis Dashboard",
+        "Customer Churn Analysis",
+        "Student Performance Analysis"
+      ]
+    },
+    {
+      "id": "cybersecurity-analyst",
+      "title": "Cybersecurity Analyst",
+      "description": "Monitors systems, identifies security threats and helps protect networks and data.",
+      "interests": [
+        "network security",
+        "ethical hacking",
+        "digital investigation",
+        "system protection"
+      ],
+      "technical_skills": [
+        "Networking",
+        "Linux",
+        "Operating Systems",
+        "Security Fundamentals",
+        "Log Analysis",
+        "Python Basics"
+      ],
+      "soft_skills": [
+        "Attention to detail",
+        "Critical thinking",
+        "Problem solving",
+        "Ethical responsibility"
+      ],
+      "tools": [
+        "Wireshark",
+        "Nmap",
+        "Linux Terminal",
+        "Splunk"
+      ],
+      "beginner_projects": [
+        "Network Traffic Analysis",
+        "Basic Log Monitoring System",
+        "Password Strength Checker"
+      ]
+    },
+    {
+      "id": "frontend-developer",
+      "title": "Frontend Developer",
+      "description": "Builds the visual and interactive parts of websites and web applications.",
+      "interests": [
+        "web development",
+        "design",
+        "user interfaces",
+        "interactive applications"
+      ],
+      "technical_skills": [
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "React",
+        "Responsive Design"
+      ],
+      "soft_skills": [
+        "Creativity",
+        "Problem solving",
+        "Attention to detail",
+        "Communication"
+      ],
+      "tools": [
+        "VS Code",
+        "Git",
+        "GitHub",
+        "Chrome DevTools"
+      ],
+      "beginner_projects": [
+        "Personal Portfolio",
+        "Weather Application",
+        "Interactive Dashboard"
+      ]
+    },
+    {
+      "id": "backend-developer",
+      "title": "Backend Developer",
+      "description": "Builds server-side application logic, APIs, database operations and integrations.",
+      "interests": [
+        "programming",
+        "databases",
+        "server development",
+        "system design"
+      ],
+      "technical_skills": [
+        "Python",
+        "Java",
+        "SQL",
+        "REST APIs",
+        "Database Design",
+        "Data Structures"
+      ],
+      "soft_skills": [
+        "Logical thinking",
+        "Problem solving",
+        "Debugging",
+        "Teamwork"
+      ],
+      "tools": [
+        "FastAPI",
+        "Postman",
+        "Git",
+        "PostgreSQL"
+      ],
+      "beginner_projects": [
+        "Student Management API",
+        "Library Backend System",
+        "Task Management API"
+      ]
+    },
+    {
+      "id": "ui-ux-designer",
+      "title": "UI/UX Designer",
+      "description": "Designs user-friendly digital experiences through research, wireframes and interface design.",
+      "interests": [
+        "visual design",
+        "creativity",
+        "user experience",
+        "human behavior"
+      ],
+      "technical_skills": [
+        "Wireframing",
+        "Prototyping",
+        "User Research",
+        "Visual Design",
+        "Usability Testing"
+      ],
+      "soft_skills": [
+        "Empathy",
+        "Creativity",
+        "Communication",
+        "Critical thinking"
+      ],
+      "tools": [
+        "Figma",
+        "FigJam",
+        "Canva",
+        "Adobe Illustrator"
+      ],
+      "beginner_projects": [
+        "Mobile App Prototype",
+        "E-commerce Website Redesign",
+        "Student Dashboard Design"
+      ]
+    },
+    {
+      "id": "machine-learning-engineer",
+      "title": "Machine Learning Engineer",
+      "description": "Builds and deploys machine learning systems that learn patterns from data.",
+      "interests": [
+        "artificial intelligence",
+        "mathematics",
+        "programming",
+        "data science"
+      ],
+      "technical_skills": [
+        "Python",
+        "Statistics",
+        "Linear Algebra",
+        "Machine Learning",
+        "Data Preprocessing",
+        "Model Evaluation"
+      ],
+      "soft_skills": [
+        "Analytical thinking",
+        "Research",
+        "Problem solving",
+        "Persistence"
+      ],
+      "tools": [
+        "Scikit-learn",
+        "TensorFlow",
+        "Pandas",
+        "Jupyter Notebook"
+      ],
+      "beginner_projects": [
+        "House Price Prediction",
+        "Customer Purchase Prediction",
+        "Student Performance Prediction"
+      ]
+    },
+    {
+      "id": "cloud-engineer",
+      "title": "Cloud Engineer",
+      "description": "Builds, deploys and maintains applications and infrastructure on cloud platforms.",
+      "interests": [
+        "cloud computing",
+        "networking",
+        "automation",
+        "system administration"
+      ],
+      "technical_skills": [
+        "Linux",
+        "Networking",
+        "Python",
+        "Cloud Fundamentals",
+        "Deployment",
+        "Scripting"
+      ],
+      "soft_skills": [
+        "Problem solving",
+        "Adaptability",
+        "Communication",
+        "Attention to detail"
+      ],
+      "tools": [
+        "AWS",
+        "Docker",
+        "Git",
+        "Linux Terminal"
+      ],
+      "beginner_projects": [
+        "Deploy a Static Website",
+        "Automated Backup Script",
+        "Cloud-Based Application Deployment"
+      ]
+    }
+  ]
+}

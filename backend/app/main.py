@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 from app import models  # noqa: F401
 from app.db import Base, engine
+from app.routers.career import router as career_router
 
 
 @asynccontextmanager
@@ -23,6 +24,8 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+
+app.include_router(career_router)
 
 
 @app.get("/health", tags=["Health"])
