@@ -62,9 +62,9 @@ Tick a box only when the step **works** and is **committed**.
 
 ### Phase 5 — Frontend skeleton + deploy
 - [x] React + Vite + Tailwind project created
-- [ ] Home page and Career Discovery page
-- [ ] `lib/api.js` calls the backend
-- [ ] CORS works between frontend and backend
+- [x] Home page and Career Discovery page
+- [x] `lib/api.js` calls the backend
+- [x] CORS works between frontend and backend
 - [ ] Deploy frontend to Vercel
 
 ### Phase 6 — Text interview + feedback (STAR FEATURE)
