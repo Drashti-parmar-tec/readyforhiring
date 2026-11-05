@@ -5,14 +5,14 @@
 
 ---
 
+
 ## Current status
 
 - **Date last updated:** 2026-11-05
-- **Current phase:** Phase 2 — Groq connection completed
-- **Last thing finished:** Groq API integration, real API test, rate-limit retry, and automated retry test. All quality checks passed.
-- **Next step:** Phase 3 — Neon PostgreSQL database setup.
-- **Blocked by:** Nothing.
-
+- **Current phase:** Phase 5 — Frontend skeleton + deploy
+- **Last thing finished:** Phase 4 — Career Discovery (commit `065f6e6`)
+- **Next step:** Create the React + Vite + Tailwind frontend
+- **Blocked by:** Nothing
 
 
 ---
@@ -52,11 +52,13 @@ Tick a box only when the step **works** and is **committed**.
 - [x] Tables created on startup
 - [x] One test row saved and read back
 
+
 ### Phase 4 — Career Discovery
-- [ ] `careers.json` with starter careers and skills
-- [ ] Career prompt returns valid JSON
-- [ ] `POST /api/career/discover` works in `/docs`
-- [ ] Result saved to database
+- [x] `careers.json` with starter careers and skills
+- [x] Career prompt returns valid JSON
+- [x] `POST /api/career/discover` works in `/docs`
+- [x] Result saved to database
+
 
 ### Phase 5 — Frontend skeleton + deploy
 - [ ] React + Vite + Tailwind project created
@@ -180,4 +182,20 @@ Tick a box only when the step **works** and is **committed**.
 - Ruff lint: PASSED.
 - Ruff formatting: PASSED.
 
-**Next session:** Review changes, commit and push the database milestone to GitHub.
+
+### Career Discovery completion — November 5, 2026
+- **Goal:** Build the Career Discovery backend feature.
+- **Done:** Career catalog, AI prompt, Pydantic schemas, Groq service, retry handling, FastAPI endpoint, Neon persistence, and automated tests.
+- **Testing:** 9 automated tests passed. Real Groq request succeeded. Swagger returned HTTP 200. Neon database save verified.
+- **Commit:** `065f6e6` — Complete Career Discovery feature.
+- **Not done:** Frontend development.
+- **Next:** Phase 5 — Frontend skeleton + deploy.
+
+### Career Discovery Completion — November 5, 2026
+
+- Goal: Build the Career Discovery backend feature.
+- Done: Career catalog, AI prompt, Pydantic schemas, Groq service, retry handling, FastAPI endpoint, and Neon database persistence.
+- Testing: 9 automated tests passed.
+- Manual verification: Real Groq request succeeded, Swagger returned HTTP 200, and Neon database save was confirmed.
+- Commit: `065f6e6` — Complete Career Discovery feature.
+- Next: Phase 5 — Frontend skeleton + deploy.
