@@ -47,10 +47,10 @@ Tick a box only when the step **works** and is **committed**.
 - [x] Automated retry test passes
 
 ### Phase 3 — Database
-- [ ] Create Neon project and copy `DATABASE_URL`
-- [ ] `db.py` and `models.py` created
-- [ ] Tables created on startup
-- [ ] One test row saved and read back
+- [x] Create Neon project and copy `DATABASE_URL`
+- [x] `db.py` and `models.py` created
+- [x] Tables created on startup
+- [x] One test row saved and read back
 
 ### Phase 4 — Career Discovery
 - [ ] `careers.json` with starter careers and skills
@@ -157,3 +157,27 @@ Tick a box only when the step **works** and is **committed**.
 - Done: Configured Groq, tested a real API request, implemented rate-limit retry, added automated retry test. Ruff checks passed; Pytest: 2 passed.
 - Not done: Database setup.
 - Next: Phase 3 — Neon PostgreSQL.
+
+### Session 3 — Neon PostgreSQL Database Integration
+
+**Completed:**
+- Created Neon PostgreSQL project using the Free plan.
+- Configured `DATABASE_URL` and `DATABASE_URL_POOLED` in `backend/.env`.
+- Verified `.env` is ignored by Git.
+- Created `backend/app/db.py` using SQLAlchemy 2.0 and psycopg.
+- Successfully connected FastAPI backend to Neon PostgreSQL.
+- Created six database models in `backend/app/models.py`.
+- Configured automatic table creation using FastAPI lifespan.
+- Successfully created all six tables in Neon.
+- Created `backend/tests/test_database.py`.
+- Successfully tested database insert, read and delete operations.
+
+**Testing results:**
+- Database test: PASSED
+- Groq retry test: PASSED
+- Health endpoint test: PASSED
+- Total: 3 tests passed.
+- Ruff lint: PASSED.
+- Ruff formatting: PASSED.
+
+**Next session:** Review changes, commit and push the database milestone to GitHub.

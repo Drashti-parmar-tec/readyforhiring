@@ -1,4 +1,19 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
+
+from app import models  # noqa: F401
+from app.db import Base, engine
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Create database tables when the application starts.
+    """
+    Base.metadata.create_all(bind=engine)
+    yield
+
 
 app = FastAPI(
     title="ReadyForHiring API",
@@ -6,6 +21,7 @@ app = FastAPI(
         "An AI-powered career development and interview preparation platform."
     ),
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 
