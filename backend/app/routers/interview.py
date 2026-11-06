@@ -1,5 +1,14 @@
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Annotated
+
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    UploadFile,
+    status,
+)
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -21,6 +30,10 @@ from app.services.interview_service import (
     InterviewServiceError,
     generate_interview_question,
 )
+from app.services.transcription_service import (
+    TranscriptionServiceError,
+    transcribe_audio,
+)
 
 router = APIRouter(
     prefix="/api/interview",
@@ -28,6 +41,8 @@ router = APIRouter(
 )
 
 DB_DEPENDENCY = Depends(get_db)
+
+MAX_AUDIO_SIZE = 10 * 1024 * 1024
 
 
 @router.post(
@@ -293,3 +308,52 @@ def get_interview_feedback(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Could not generate interview feedback. Please try again.",
         ) from exc
+
+
+@router.post(
+    "/transcribe",
+    status_code=status.HTTP_200_OK,
+)
+async def transcribe_interview_audio(
+    audio: Annotated[UploadFile, File()],
+) -> dict[str, str]:
+    """Transcribe an uploaded audio recording using Groq Whisper."""
+
+    if not audio.content_type or not audio.content_type.startswith("audio/"):
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Please upload a valid audio recording.",
+        )
+
+    try:
+        audio_data = await audio.read(MAX_AUDIO_SIZE + 1)
+
+        if not audio_data:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="The uploaded audio file is empty.",
+            )
+
+        if len(audio_data) > MAX_AUDIO_SIZE:
+            raise HTTPException(
+                status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+                detail="Audio file must be 10 MB or smaller.",
+            )
+
+        filename = audio.filename or "recording.webm"
+
+        transcription = transcribe_audio(
+            audio_data=audio_data,
+            filename=filename,
+        )
+
+        return {"text": transcription}
+
+    except TranscriptionServiceError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
+
+    finally:
+        await audio.close()

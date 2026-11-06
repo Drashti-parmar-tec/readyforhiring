@@ -96,3 +96,56 @@ export function getInterviewFeedback(interviewId) {
     }),
   })
 }
+
+// Transcribe an interview audio recording using Groq Whisper
+export async function transcribeInterviewAudio(audioBlob) {
+  if (!audioBlob || audioBlob.size === 0) {
+    throw new Error('Your recording is empty. Please record your answer again.')
+  }
+
+  const formData = new FormData()
+
+  const extension = audioBlob.type.includes('mp4') ? 'mp4' : 'webm'
+
+  formData.append(
+    'audio',
+    audioBlob,
+    `interview-recording.${extension}`
+  )
+
+  let response
+
+  try {
+    response = await fetch(`${API_BASE_URL}/api/interview/transcribe`, {
+      method: 'POST',
+      body: formData,
+    })
+  } catch {
+    throw new Error(
+      'Unable to upload your recording. Please check your internet connection and try again.'
+    )
+  }
+
+  let data
+
+  try {
+    data = await response.json()
+  } catch {
+    throw new Error('The server returned an invalid transcription response.')
+  }
+
+  if (!response.ok) {
+    const message =
+      typeof data.detail === 'string'
+        ? data.detail
+        : 'Could not transcribe your recording. Please try again.'
+
+    throw new Error(message)
+  }
+
+  if (typeof data.text !== 'string' || !data.text.trim()) {
+    throw new Error('No speech was detected. Please try recording again.')
+  }
+
+  return data.text
+}

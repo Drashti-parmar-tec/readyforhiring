@@ -4,6 +4,7 @@ import {
   startInterview,
   submitInterviewAnswer,
   getInterviewFeedback,
+  transcribeInterviewAudio,
 } from './lib/api'
 
 const navigation = [
@@ -40,6 +41,18 @@ function App() {
   const [interviewError, setInterviewError] = useState('')
   const [feedback, setFeedback] = useState(null)
 
+  // Voice Interview
+  const [voiceEnabled, setVoiceEnabled] = useState(true)
+  const [isRecording, setIsRecording] = useState(false)
+  const [isTranscribing, setIsTranscribing] = useState(false)
+  const [recordingSeconds, setRecordingSeconds] = useState(0)
+  const [voiceError, setVoiceError] = useState('')
+
+  const mediaRecorderRef = useRef(null)
+  const microphoneStreamRef = useRef(null)
+  const recordingChunksRef = useRef([])
+  const recordingTimerRef = useRef(null)
+
   // Camera
   const [cameraStream, setCameraStream] = useState(null)
   const [cameraEnabled, setCameraEnabled] = useState(false)
@@ -66,6 +79,58 @@ function App() {
     }
   }, [cameraStream])
 
+  // Speak each new interview question aloud.
+  useEffect(() => {
+    if (
+      interviewStage === 'active' &&
+      voiceEnabled &&
+      question?.question &&
+      'speechSynthesis' in window
+    ) {
+      window.speechSynthesis.cancel()
+
+      const utterance = new SpeechSynthesisUtterance(question.question)
+      utterance.rate = 0.95
+
+      window.speechSynthesis.speak(utterance)
+    }
+
+    return () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel()
+      }
+    }
+  }, [interviewStage, question, voiceEnabled])
+
+  // Clean up microphone and speech when the component is removed.
+  useEffect(() => {
+    return () => {
+      if (recordingTimerRef.current) {
+        window.clearInterval(recordingTimerRef.current)
+      }
+
+      if (
+        mediaRecorderRef.current &&
+        mediaRecorderRef.current.state !== 'inactive'
+      ) {
+        mediaRecorderRef.current.onstop = null
+        mediaRecorderRef.current.stop()
+      }
+
+      if (microphoneStreamRef.current) {
+        microphoneStreamRef.current
+          .getTracks()
+          .forEach((track) => track.stop())
+
+        microphoneStreamRef.current = null
+      }
+
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel()
+      }
+    }
+  }, [])
+
   async function handleDiscoverCareers(event) {
     event.preventDefault()
     setCareerLoading(true)
@@ -82,7 +147,219 @@ function App() {
     }
   }
 
+  function stopVoiceRecording() {
+    if (recordingTimerRef.current) {
+      window.clearInterval(recordingTimerRef.current)
+      recordingTimerRef.current = null
+    }
+
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== 'inactive'
+    ) {
+      mediaRecorderRef.current.stop()
+    } else if (microphoneStreamRef.current) {
+      microphoneStreamRef.current
+        .getTracks()
+        .forEach((track) => track.stop())
+
+      microphoneStreamRef.current = null
+    }
+
+    setIsRecording(false)
+  }
+
+
+  async function startVoiceRecording() {
+    setVoiceError('')
+    setInterviewError('')
+
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      setVoiceError(
+        'Voice recording is not supported by this browser. You can type your answer instead.'
+      )
+      return
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      })
+
+      microphoneStreamRef.current = stream
+
+      const preferredTypes = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4',
+      ]
+
+      const mimeType = preferredTypes.find((type) =>
+        MediaRecorder.isTypeSupported(type)
+      )
+
+      const recorder = mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream)
+
+      recordingChunksRef.current = []
+
+      recorder.ondataavailable = (event) => {
+        if (event.data && event.data.size > 0) {
+          recordingChunksRef.current.push(event.data)
+        }
+      }
+
+      recorder.onerror = () => {
+        setVoiceError(
+          'Recording failed. Please try again or type your answer.'
+        )
+      }
+
+      recorder.onstop = async () => {
+        const blobType = recorder.mimeType || 'audio/webm'
+
+        const audioBlob = new Blob(recordingChunksRef.current, {
+          type: blobType,
+        })
+
+        recordingChunksRef.current = []
+
+        if (microphoneStreamRef.current) {
+          microphoneStreamRef.current
+            .getTracks()
+            .forEach((track) => track.stop())
+
+          microphoneStreamRef.current = null
+        }
+
+        if (!audioBlob.size) {
+          setVoiceError('No audio was recorded. Please try again.')
+          return
+        }
+
+        setIsTranscribing(true)
+        setVoiceError('')
+
+        try {
+          const transcription =
+            await transcribeInterviewAudio(audioBlob)
+
+          setAnswer((current) =>
+            current.trim()
+              ? `${current.trim()} ${transcription}`
+              : transcription
+          )
+        } catch (error) {
+          setVoiceError(error.message)
+        } finally {
+          setIsTranscribing(false)
+        }
+      }
+
+      mediaRecorderRef.current = recorder
+      recorder.start()
+
+      setIsRecording(true)
+      setRecordingSeconds(0)
+
+      recordingTimerRef.current = window.setInterval(() => {
+        setRecordingSeconds((seconds) => seconds + 1)
+      }, 1000)
+    } catch {
+      setVoiceError(
+        'Microphone access was denied or is unavailable. Allow microphone permission, or type your answer.'
+      )
+    }
+  }
+
+  function finishVoiceRecording() {
+    if (recordingTimerRef.current) {
+      window.clearInterval(recordingTimerRef.current)
+      recordingTimerRef.current = null
+    }
+
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== 'inactive'
+    ) {
+      mediaRecorderRef.current.stop()
+    }
+
+    setIsRecording(false)
+  }
+
+  function renderVoiceControls() {
+    return (
+      <div className="mt-4 rounded-xl border border-slate-700 bg-slate-800/70 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-white">
+              Voice answer
+            </p>
+            <p className="mt-1 text-xs text-slate-400">
+              Record your answer, then review the transcript before submitting.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() =>
+              setVoiceEnabled((enabled) => !enabled)
+            }
+            className="rounded-lg border border-slate-600 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700"
+          >
+            AI voice: {voiceEnabled ? 'On' : 'Off'}
+          </button>
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          {!isRecording ? (
+            <button
+              type="button"
+              onClick={startVoiceRecording}
+              disabled={isTranscribing || interviewLoading}
+              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+            >
+              {isTranscribing
+                ? 'Transcribing...'
+                : '● Record answer'}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={finishVoiceRecording}
+              className="rounded-lg bg-slate-600 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-500"
+            >
+              ■ Stop recording
+            </button>
+          )}
+
+          {isRecording && (
+            <span className="text-sm font-semibold text-red-300">
+              Recording{' '}
+              {Math.floor(recordingSeconds / 60)}:
+              {String(recordingSeconds % 60).padStart(2, '0')}
+            </span>
+          )}
+        </div>
+
+        {voiceError && (
+          <p className="mt-3 text-sm text-red-400">
+            {voiceError}
+          </p>
+        )}
+      </div>
+    )
+  }
+
   function resetInterview() {
+    stopVoiceRecording()
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel()
+    }
+
     stopCamera()
     setInterviewStage('setup')
     setInterviewMode('text')
@@ -94,6 +371,9 @@ function App() {
     setInterviewLoading(false)
     setInterviewError('')
     setFeedback(null)
+    setVoiceError('')
+    setIsTranscribing(false)
+    setRecordingSeconds(0)
   }
 
   async function handleStartInterview(event) {
@@ -109,6 +389,7 @@ function App() {
 
     try {
       const result = await startInterview(interviewRole.trim())
+
       setInterviewId(result.interview_id)
       setQuestion(result.question)
       setQuestionNumber(result.question.question_number || 1)
@@ -183,6 +464,13 @@ function App() {
   async function handleSubmitAnswer(event) {
     event.preventDefault()
 
+    if (isRecording || isTranscribing) {
+      setInterviewError(
+        'Stop the recording and wait for transcription before submitting.'
+      )
+      return
+    }
+
     if (!answer.trim()) {
       setInterviewError('Please enter your answer before continuing.')
       return
@@ -243,9 +531,10 @@ function App() {
     ? 'border-slate-700 bg-slate-900'
     : 'border-slate-200 bg-white'
 
-  const mutedTextClass = isDark ? 'text-slate-400' : 'text-slate-500'
-
-  function renderInterviewSetup() {
+  const mutedTextClass = isDark
+    ? 'text-slate-400'
+    : 'text-slate-500'
+    function renderInterviewSetup() {
     return (
       <div className="mx-auto max-w-3xl">
         <div className={`rounded-2xl border p-8 shadow-sm ${cardClass}`}>
@@ -277,7 +566,7 @@ function App() {
               <span className="text-2xl">⌨️</span>
               <h3 className="mt-3 font-bold">Text Interview</h3>
               <p className={`mt-1 text-sm ${mutedTextClass}`}>
-                Answer questions by typing.
+                Answer questions by typing or using your microphone.
               </p>
             </button>
 
@@ -295,7 +584,7 @@ function App() {
               <span className="text-2xl">📹</span>
               <h3 className="mt-3 font-bold">Camera Interview</h3>
               <p className={`mt-1 text-sm ${mutedTextClass}`}>
-                Practice with your camera preview.
+                Practice with your camera and microphone.
               </p>
             </button>
           </div>
@@ -310,6 +599,7 @@ function App() {
             <label className="mb-2 block text-sm font-semibold">
               Job role
             </label>
+
             <input
               type="text"
               value={interviewRole}
@@ -323,11 +613,15 @@ function App() {
             />
 
             {interviewError && (
-              <p className="mt-3 text-sm text-red-500">{interviewError}</p>
+              <p className="mt-3 text-sm text-red-500">
+                {interviewError}
+              </p>
             )}
 
             {cameraError && (
-              <p className="mt-3 text-sm text-red-500">{cameraError}</p>
+              <p className="mt-3 text-sm text-red-500">
+                {cameraError}
+              </p>
             )}
 
             <button
@@ -393,7 +687,9 @@ function App() {
             <h1 className="text-lg font-bold">ReadyForHiring</h1>
             <p className="text-xs text-slate-400">
               {interviewRole} ·{' '}
-              {interviewMode === 'camera' ? 'Live Interview' : 'Text Interview'}
+              {interviewMode === 'camera'
+                ? 'Live Interview'
+                : 'Text Interview'}
             </p>
           </div>
 
@@ -425,6 +721,7 @@ function App() {
                 <h2 className="text-3xl font-bold sm:text-4xl">
                   Your AI Interviewer
                 </h2>
+
                 <p className="mt-3 text-base text-blue-100/80">
                   I'm interviewing you for {interviewRole}
                 </p>
@@ -443,6 +740,7 @@ function App() {
                   <p className="text-xs font-bold uppercase tracking-wider text-blue-300">
                     Interview Question
                   </p>
+
                   <span className="text-sm text-slate-400">
                     {questionNumber} / 6
                   </span>
@@ -452,11 +750,13 @@ function App() {
                   {question?.question}
                 </p>
 
+                {renderVoiceControls()}
+
                 <form onSubmit={handleSubmitAnswer}>
                   <textarea
                     value={answer}
                     onChange={(event) => setAnswer(event.target.value)}
-                    placeholder="Type your answer here..."
+                    placeholder="Type your answer here or record your voice above..."
                     rows={2}
                     className="mt-4 w-full resize-none rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-400 focus:border-blue-500"
                   />
@@ -476,7 +776,12 @@ function App() {
                   <div className="mt-4 flex justify-end">
                     <button
                       type="submit"
-                      disabled={interviewLoading || !answer.trim()}
+                      disabled={
+                        interviewLoading ||
+                        isRecording ||
+                        isTranscribing ||
+                        !answer.trim()
+                      }
                       className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {interviewLoading
@@ -495,7 +800,11 @@ function App() {
                 <div className="mx-auto mb-5 flex h-24 w-24 items-center justify-center rounded-full bg-blue-600/20">
                   <span className="text-5xl text-blue-300">✧</span>
                 </div>
-                <h2 className="text-2xl font-bold">AI Interviewer</h2>
+
+                <h2 className="text-2xl font-bold">
+                  AI Interviewer
+                </h2>
+
                 <p className="mt-2 text-slate-400">
                   Interview for {interviewRole}
                 </p>
@@ -506,6 +815,7 @@ function App() {
                   <p className="text-xs font-bold uppercase tracking-wider text-blue-300">
                     Interview Question
                   </p>
+
                   <span className="text-sm text-slate-400">
                     {questionNumber} / 6
                   </span>
@@ -515,11 +825,13 @@ function App() {
                   {question?.question}
                 </p>
 
+                {renderVoiceControls()}
+
                 <form onSubmit={handleSubmitAnswer}>
                   <textarea
                     value={answer}
                     onChange={(event) => setAnswer(event.target.value)}
-                    placeholder="Type your answer here..."
+                    placeholder="Type your answer here or record your voice above..."
                     rows={5}
                     className="mt-6 w-full resize-y rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none placeholder:text-slate-400 focus:border-blue-500"
                   />
@@ -532,10 +844,17 @@ function App() {
 
                   <button
                     type="submit"
-                    disabled={interviewLoading || !answer.trim()}
+                    disabled={
+                      interviewLoading ||
+                      isRecording ||
+                      isTranscribing ||
+                      !answer.trim()
+                    }
                     className="mt-5 w-full rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {interviewLoading ? 'Submitting...' : 'Submit Answer →'}
+                    {interviewLoading
+                      ? 'Submitting...'
+                      : 'Submit Answer →'}
                   </button>
                 </form>
               </div>
@@ -545,8 +864,7 @@ function App() {
       </div>
     )
   }
-
-  function renderFeedback() {
+    function renderFeedback() {
     if (interviewLoading) {
       return (
         <div className="flex min-h-screen items-center justify-center bg-slate-50">
@@ -601,12 +919,15 @@ function App() {
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-3xl text-green-700">
               ✓
             </div>
+
             <p className="font-bold uppercase tracking-wider text-green-600">
               Interview Completed
             </p>
+
             <h1 className="mt-3 text-4xl font-bold">
               Your performance report
             </h1>
+
             <p className="mt-3 text-slate-500">
               Review your results and identify where you can improve.
             </p>
@@ -616,10 +937,12 @@ function App() {
             <p className="font-semibold text-slate-500">
               Overall interview score
             </p>
+
             <p className="mt-2 text-6xl font-bold text-blue-600">
               {feedback.overall_score}
               <span className="text-2xl text-slate-400">/100</span>
             </p>
+
             <p className="mt-3 text-sm text-slate-500">
               Your performance across six interview questions.
             </p>
@@ -630,6 +953,7 @@ function App() {
               <h2 className="text-lg font-bold text-green-600">
                 Your strengths
               </h2>
+
               <ul className="mt-5 space-y-3 text-sm leading-relaxed text-slate-600">
                 {(feedback.strengths || []).map((item, index) => (
                   <li key={index}>✓ {item}</li>
@@ -641,6 +965,7 @@ function App() {
               <h2 className="text-lg font-bold text-orange-600">
                 Areas to improve
               </h2>
+
               <ul className="mt-5 space-y-3 text-sm leading-relaxed text-slate-600">
                 {(feedback.improvements || []).map((item, index) => (
                   <li key={index}>• {item}</li>
@@ -651,6 +976,7 @@ function App() {
 
           <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-7">
             <h2 className="text-lg font-bold">Overall feedback</h2>
+
             <p className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-600">
               {feedback.summary}
             </p>
@@ -674,7 +1000,10 @@ function App() {
     return (
       <div>
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Welcome to ReadyForHiring</h1>
+          <h1 className="text-3xl font-bold">
+            Welcome to ReadyForHiring
+          </h1>
+
           <p className={`mt-2 ${mutedTextClass}`}>
             Your personal career development workspace.
           </p>
@@ -713,11 +1042,18 @@ function App() {
               onClick={() => setActivePage(item.page)}
               className={`rounded-2xl border p-6 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md ${cardClass}`}
             >
-              <span className="text-3xl text-blue-600">{item.icon}</span>
-              <h2 className="mt-4 text-lg font-bold">{item.title}</h2>
+              <span className="text-3xl text-blue-600">
+                {item.icon}
+              </span>
+
+              <h2 className="mt-4 text-lg font-bold">
+                {item.title}
+              </h2>
+
               <p className={`mt-2 text-sm ${mutedTextClass}`}>
                 {item.description}
               </p>
+
               <span className="mt-5 inline-block text-sm font-semibold text-blue-600">
                 Open feature →
               </span>
@@ -733,6 +1069,7 @@ function App() {
       <div className="mx-auto max-w-4xl">
         <div className="mb-7">
           <h1 className="text-3xl font-bold">Career Discovery</h1>
+
           <p className={`mt-2 ${mutedTextClass}`}>
             Find career paths that match your interests and skills.
           </p>
@@ -745,6 +1082,7 @@ function App() {
           <label className="mb-2 block text-sm font-semibold">
             What are your interests?
           </label>
+
           <textarea
             value={interests}
             onChange={(event) => setInterests(event.target.value)}
@@ -760,6 +1098,7 @@ function App() {
           <label className="mb-2 mt-5 block text-sm font-semibold">
             What skills do you have?
           </label>
+
           <textarea
             value={skills}
             onChange={(event) => setSkills(event.target.value)}
@@ -773,7 +1112,9 @@ function App() {
           />
 
           {careerError && (
-            <p className="mt-3 text-sm text-red-500">{careerError}</p>
+            <p className="mt-3 text-sm text-red-500">
+              {careerError}
+            </p>
           )}
 
           <button
@@ -787,7 +1128,10 @@ function App() {
 
         {recommendations.length > 0 && (
           <div className="mt-8">
-            <h2 className="mb-5 text-xl font-bold">Your recommendations</h2>
+            <h2 className="mb-5 text-xl font-bold">
+              Your recommendations
+            </h2>
+
             <div className="grid gap-4 md:grid-cols-2">
               {recommendations.map((career, index) => (
                 <div
@@ -797,9 +1141,11 @@ function App() {
                   <h3 className="text-lg font-bold">
                     {career.title || career.name}
                   </h3>
+
                   <p className={`mt-2 text-sm ${mutedTextClass}`}>
                     {career.description}
                   </p>
+
                   {career.match_score !== undefined && (
                     <p className="mt-4 font-semibold text-blue-600">
                       Match score: {career.match_score}%
@@ -818,7 +1164,11 @@ function App() {
     return (
       <section className={`rounded-2xl border p-8 shadow-sm ${cardClass}`}>
         <h1 className="text-3xl font-bold">{title}</h1>
-        <p className={`mt-4 ${mutedTextClass}`}>{description}</p>
+
+        <p className={`mt-4 ${mutedTextClass}`}>
+          {description}
+        </p>
+
         <button
           type="button"
           onClick={() => setActivePage('Dashboard')}
@@ -834,7 +1184,10 @@ function App() {
     return renderActiveInterview()
   }
 
-  if (interviewStage === 'feedback' || interviewStage === 'completed') {
+  if (
+    interviewStage === 'feedback' ||
+    interviewStage === 'completed'
+  ) {
     return renderFeedback()
   }
 
@@ -860,8 +1213,10 @@ function App() {
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-xl font-bold text-white">
             R
           </div>
+
           <div>
             <h1 className="text-lg font-bold">ReadyForHiring</h1>
+
             <p className={`text-xs ${mutedTextClass}`}>
               Your career companion
             </p>
@@ -912,6 +1267,7 @@ function App() {
             <span className="text-lg">⚙️</span>
             Settings
           </button>
+
           <p className={`mt-5 border-t border-slate-200 pt-5 text-sm font-bold ${mutedTextClass}`}>
             ReadyForHiring
           </p>
@@ -935,10 +1291,14 @@ function App() {
             >
               ☰
             </button>
+
             <div>
               <h2 className="font-bold">
-                {activePage === 'Settings' ? 'Settings' : activePage}
+                {activePage === 'Settings'
+                  ? 'Settings'
+                  : activePage}
               </h2>
+
               <p className={`text-xs ${mutedTextClass}`}>
                 Your personal career workspace
               </p>
@@ -949,6 +1309,7 @@ function App() {
             <span className={`hidden text-sm sm:block ${mutedTextClass}`}>
               Welcome back!
             </span>
+
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 font-bold text-blue-700">
               U
             </div>
@@ -958,9 +1319,11 @@ function App() {
         <main className="flex-1 p-5 sm:p-8">
           {activePage === 'Dashboard' && renderDashboard()}
 
-          {activePage === 'Career Discovery' && renderCareerDiscovery()}
+          {activePage === 'Career Discovery' &&
+            renderCareerDiscovery()}
 
-          {activePage === 'AI Interview' && renderInterviewSetup()}
+          {activePage === 'AI Interview' &&
+            renderInterviewSetup()}
 
           {activePage === 'Resume Analysis' &&
             renderPlaceholder(
@@ -977,6 +1340,7 @@ function App() {
           {activePage === 'Settings' && (
             <section className={`rounded-2xl border p-8 ${cardClass}`}>
               <h1 className="text-2xl font-bold">Settings</h1>
+
               <p className={`mt-2 ${mutedTextClass}`}>
                 Customize your ReadyForHiring experience.
               </p>
@@ -984,6 +1348,7 @@ function App() {
               <div className="mt-7 flex items-center justify-between">
                 <div>
                   <h2 className="font-semibold">Dark mode</h2>
+
                   <p className={`mt-1 text-sm ${mutedTextClass}`}>
                     Change the appearance of the application.
                   </p>
