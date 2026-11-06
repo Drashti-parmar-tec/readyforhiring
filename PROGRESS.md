@@ -1,16 +1,17 @@
 # ReadyForHiring — Project Progress
 
-Last updated: 6 November 2026
+Last updated: 7 November 2026
 
 ## 1. Current Status
 
 **Project:** ReadyForHiring  
 **Project type:** AI-powered international career development platform  
-**Current phase:** Phase 6 — AI Interview  
-**Current milestone:** Text Interview frontend and backend integration  
-**Development status:** Working locally; changes not yet committed.
+**Current phase:** Phase 7 — Live Camera and Voice Interview  
+**Current milestone:** Voice interview production integration and verification  
+**Development status:** Core voice feature implemented, committed, pushed to GitHub, deployed, and successfully tested in production.
 
 ### Completed recently
+
 - Full-screen AI Interview Studio.
 - Job role selection.
 - Six-question AI-generated interview.
@@ -18,7 +19,17 @@ Last updated: 6 November 2026
 - AI-generated performance feedback.
 - Interview score, strengths and improvements displayed.
 - Interview data and feedback saved in Neon PostgreSQL.
-- Frontend and backend integration tested successfully.
+- Camera preview integration.
+- Browser microphone recording.
+- Browser speech synthesis for AI questions.
+- Groq Whisper speech-to-text integration.
+- Audio transcription endpoint deployed to Render.
+- Voice interview tested locally.
+- Live transcription endpoint tested successfully.
+- Live Vercel voice interview tested successfully.
+- Fixed production Groq model configuration.
+- Replaced exposed Groq API key.
+- Added backend transcription error logging.
 
 ## 2. Technology Stack
 
@@ -27,6 +38,7 @@ Last updated: 6 November 2026
 | Frontend | React, Vite, Tailwind CSS |
 | Backend | Python 3.12, FastAPI |
 | AI | Groq |
+| Speech-to-text | Groq Whisper |
 | Database | Neon PostgreSQL |
 | Backend hosting | Render |
 | Frontend hosting | Vercel |
@@ -82,22 +94,60 @@ Last updated: 6 November 2026
 - [x] Frontend API integration
 - [x] Real end-to-end interview test
 - [x] Feedback screen
-- [x] Backend tests — 21 passed
+- [x] Backend tests — 21 passed at Phase 6 completion
 - [x] Ruff checks passed
 - [x] Frontend production build passed
-- [ ] Final Git review and commit
+- [x] Final Git review
+- [x] Commit and push to GitHub
 
-**Note:** Text Interview has passed local testing. Phase 6 is not yet committed.
+**Phase 6 status:** Complete.
+
+**Commit:** `2d1a88f` — Build AI text interview experience.
 
 ### Phase 7 — Live Camera and Voice Interview
-- [ ] Interview camera interface
-- [ ] Browser camera permission handling
-- [ ] Live camera preview
-- [ ] Spoken AI questions
-- [ ] Voice answer recording
-- [ ] Groq Whisper transcription
-- [ ] Voice interview testing
-- [ ] Voice interview feedback
+
+**Camera interview**
+- [x] Camera preview integration
+- [x] Camera interview layout
+- [x] Camera preview tested locally
+- [x] Typed camera interview tested
+- [x] Filler-word count
+- [ ] Words-per-minute calculation
+- [ ] Confirm and finish the simple 2D animated avatar requirement
+
+**Voice interview**
+- [x] Browser microphone recording
+- [x] Browser speaks AI questions using speechSynthesis
+- [x] Audio upload integration
+- [x] POST `/api/interview/transcribe`
+- [x] Groq Whisper transcription
+- [x] Transcription response validation
+- [x] Transcript review and editing
+- [x] Submit transcribed answers to interview API
+- [x] Six-question voice interview tested locally
+- [x] Voice interview feedback generation tested
+- [x] Live Render transcription endpoint verified — HTTP 200
+- [x] Live Vercel voice interview tested successfully
+- [x] Microphone cleanup and recording handling
+- [x] Backend transcription tests — 5 passed
+- [x] Full backend test suite — 26 passed
+- [x] Ruff checks passed
+- [x] Frontend production build passed
+- [x] Voice feature committed and pushed
+- [x] Diagnostic logging committed and pushed
+- [x] Render production deployment verified
+
+**Remaining Phase 7 work**
+- [ ] Filler-word count
+- [ ] Words-per-minute calculation
+- [ ] Confirm and finish the simple 2D animated avatar requirement
+
+**Phase 7 status:** Core camera and voice functionality implemented. Voice transcription verified in production. Remaining analysis metrics and avatar work are pending.
+
+**Important Git commits:**
+- `7a21ac1` — Improve camera interview layout
+- `a7730dd` — Add voice interview transcription
+- `379687b` — Add transcription error logging
 
 ### Phase 8 — Resume Analysis
 - [ ] Resume upload
@@ -145,18 +195,29 @@ Last updated: 6 November 2026
 
 ## 5. Known Limitations
 
-- Camera and voice interview are not implemented yet.
+- Filler-word analysis is not implemented.
+- Speaking-speed calculation is not implemented.
+- The simple 2D animated avatar requirement is not finalized.
 - Interview question diversity needs improvement.
 - Login and proper authentication are not implemented.
 - Dashboard statistics are currently placeholders.
 - Resume Analysis and AI Career Assistant are not implemented.
 - The current career catalog contains eight starter careers.
+- Camera production verification remains pending.
 
 ## 6. Next Development Step
 
-**Immediate task:** Review the pending Phase 6 changes, update this tracker, run final checks, and commit the Text Interview milestone to GitHub.
+**Immediate task:** Complete the remaining Phase 7 features.
 
-After that, begin Phase 7: Live Camera and Voice Interview.
+Recommended order:
+
+1. Implement filler-word counting.
+2. Implement words-per-minute calculation.
+3. Review and finalize the simple 2D animated avatar.
+4. Test the completed camera and voice interview flow.
+5. Update this tracker and close Phase 7.
+
+After Phase 7 is complete, begin Phase 8 — Resume Analysis.
 
 ## 7. Development Notes
 
@@ -168,3 +229,5 @@ After that, begin Phase 7: Live Camera and Voice Interview.
 - Update this file after each completed milestone.
 - Follow `Architecture.md` for technical decisions.
 - Follow `Project-Instructions.md` for development workflow.
+- Work on one file at a time.
+- Wait for confirmation before moving to the next development step.

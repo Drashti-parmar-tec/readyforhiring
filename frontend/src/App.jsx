@@ -15,6 +15,37 @@ const navigation = [
   { name: 'AI Career Assistant', icon: '✧' },
 ]
 
+// Count common spoken fillers using whole-word / whole-phrase matches.
+// These are indicators, not a definitive measure of communication quality.
+function analyzeFillerWords(transcripts) {
+  const combinedText = transcripts.join(' ').toLowerCase()
+
+  const patterns = [
+    { label: 'Um', regex: /\bum+\b/g },
+    { label: 'Uh', regex: /\buh+\b/g },
+    { label: 'Er', regex: /\ber+\b/g },
+    { label: 'Ah', regex: /\bah+\b/g },
+    { label: 'Hmm', regex: /\bhmm+\b/g },
+    { label: 'You know', regex: /\byou\s+know\b/g },
+    { label: 'I mean', regex: /\bi\s+mean\b/g },
+    { label: 'Basically', regex: /\bbasically\b/g },
+    { label: 'Kind of', regex: /\bkind\s+of\b/g },
+    { label: 'Sort of', regex: /\bsort\s+of\b/g },
+  ]
+
+  const breakdown = patterns
+    .map(({ label, regex }) => ({
+      label,
+      count: [...combinedText.matchAll(regex)].length,
+    }))
+    .filter((item) => item.count > 0)
+
+  return {
+    total: breakdown.reduce((sum, item) => sum + item.count, 0),
+    breakdown,
+  }
+}
+
 function App() {
   const [activePage, setActivePage] = useState('Dashboard')
   const [theme, setTheme] = useState(
@@ -40,6 +71,7 @@ function App() {
   const [interviewLoading, setInterviewLoading] = useState(false)
   const [interviewError, setInterviewError] = useState('')
   const [feedback, setFeedback] = useState(null)
+  const [voiceTranscripts, setVoiceTranscripts] = useState([])
 
   // Voice Interview
   const [voiceEnabled, setVoiceEnabled] = useState(true)
@@ -245,6 +277,8 @@ function App() {
           const transcription =
             await transcribeInterviewAudio(audioBlob)
 
+          setVoiceTranscripts((current) => [...current, transcription])
+
           setAnswer((current) =>
             current.trim()
               ? `${current.trim()} ${transcription}`
@@ -371,6 +405,7 @@ function App() {
     setInterviewLoading(false)
     setInterviewError('')
     setFeedback(null)
+    setVoiceTranscripts([])
     setVoiceError('')
     setIsTranscribing(false)
     setRecordingSeconds(0)
@@ -386,6 +421,7 @@ function App() {
 
     setInterviewLoading(true)
     setInterviewError('')
+    setVoiceTranscripts([])
 
     try {
       const result = await startInterview(interviewRole.trim())
@@ -865,6 +901,8 @@ function App() {
     )
   }
     function renderFeedback() {
+    const fillerAnalysis = analyzeFillerWords(voiceTranscripts)
+
     if (interviewLoading) {
       return (
         <div className="flex min-h-screen items-center justify-center bg-slate-50">
@@ -933,23 +971,85 @@ function App() {
             </p>
           </div>
 
-          <section className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-            <p className="font-semibold text-slate-500">
-              Overall interview score
-            </p>
+          <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+            <div className="bg-gradient-to-r from-blue-700 to-indigo-600 px-8 py-7 text-center text-white">
+              <p className="text-sm font-semibold text-blue-100">
+                Overall interview score
+              </p>
 
-            <p className="mt-2 text-6xl font-bold text-blue-600">
-              {feedback.overall_score}
-              <span className="text-2xl text-slate-400">/100</span>
-            </p>
+              <p className="mt-2 text-6xl font-bold tracking-tight">
+                {feedback.overall_score}
+                <span className="text-2xl text-blue-200">/100</span>
+              </p>
 
-            <p className="mt-3 text-sm text-slate-500">
-              Your performance across six interview questions.
+              <p className="mt-3 text-sm text-blue-100">
+                Your performance across six interview questions.
+              </p>
+            </div>
+          </section>
+
+          <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-blue-600">
+                  Speaking analysis
+                </p>
+                <h2 className="mt-2 text-xl font-bold text-slate-900">
+                  Potential filler words
+                </h2>
+                <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">
+                  Based on your recorded and transcribed answers only. Typed
+                  answers are not included.
+                </p>
+              </div>
+
+              {voiceTranscripts.length > 0 && (
+                <div className="min-w-24 rounded-xl bg-blue-50 px-5 py-3 text-center">
+                  <p className="text-3xl font-bold text-blue-700">
+                    {fillerAnalysis.total}
+                  </p>
+                  <p className="text-xs font-semibold text-blue-600">
+                    detected
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {voiceTranscripts.length === 0 ? (
+              <p className="mt-5 rounded-xl bg-slate-50 px-4 py-4 text-sm text-slate-600">
+                No voice answers were recorded. Speaking analysis will appear
+                here when you complete an interview using the microphone.
+              </p>
+            ) : fillerAnalysis.breakdown.length === 0 ? (
+              <p className="mt-5 rounded-xl bg-emerald-50 px-4 py-4 text-sm font-medium text-emerald-800">
+                No common filler words were detected in your recorded answers.
+              </p>
+            ) : (
+              <div className="mt-5 flex flex-wrap gap-2">
+                {fillerAnalysis.breakdown.map((item) => (
+                  <span
+                    key={item.label}
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700"
+                  >
+                    <span className="font-semibold">{item.label}</span>
+                    <span className="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-blue-700">
+                      {item.count}
+                    </span>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <p className="mt-4 text-xs leading-5 text-slate-400">
+              This is an automated estimate. Some phrases, such as “basically”
+              or “I mean”, can be meaningful depending on context. Use the
+              count as a practice signal, not as a judgment of your speaking
+              ability.
             </p>
           </section>
 
           <div className="mt-6 grid gap-6 sm:grid-cols-2">
-            <section className="rounded-2xl border border-slate-200 bg-white p-7">
+            <section className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
               <h2 className="text-lg font-bold text-green-600">
                 Your strengths
               </h2>
@@ -961,7 +1061,7 @@ function App() {
               </ul>
             </section>
 
-            <section className="rounded-2xl border border-slate-200 bg-white p-7">
+            <section className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
               <h2 className="text-lg font-bold text-orange-600">
                 Areas to improve
               </h2>
@@ -974,7 +1074,7 @@ function App() {
             </section>
           </div>
 
-          <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-7">
+          <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
             <h2 className="text-lg font-bold">Overall feedback</h2>
 
             <p className="mt-4 whitespace-pre-line text-sm leading-7 text-slate-600">
