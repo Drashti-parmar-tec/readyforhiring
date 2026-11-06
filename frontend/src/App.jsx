@@ -72,6 +72,7 @@ function App() {
   const [interviewError, setInterviewError] = useState('')
   const [feedback, setFeedback] = useState(null)
   const [voiceTranscripts, setVoiceTranscripts] = useState([])
+  const [voiceRecordingDurations, setVoiceRecordingDurations] = useState([])
 
   // Voice Interview
   const [voiceEnabled, setVoiceEnabled] = useState(true)
@@ -84,6 +85,7 @@ function App() {
   const microphoneStreamRef = useRef(null)
   const recordingChunksRef = useRef([])
   const recordingTimerRef = useRef(null)
+  const recordingStartedAtRef = useRef(null)
 
   // Camera
   const [cameraStream, setCameraStream] = useState(null)
@@ -249,6 +251,11 @@ function App() {
       }
 
       recorder.onstop = async () => {
+        const recordingDuration = recordingStartedAtRef.current
+          ? Math.max(0, (performance.now() - recordingStartedAtRef.current) / 1000)
+          : 0
+        recordingStartedAtRef.current = null
+
         const blobType = recorder.mimeType || 'audio/webm'
 
         const audioBlob = new Blob(recordingChunksRef.current, {
@@ -278,6 +285,10 @@ function App() {
             await transcribeInterviewAudio(audioBlob)
 
           setVoiceTranscripts((current) => [...current, transcription])
+          setVoiceRecordingDurations((current) => [
+            ...current,
+            recordingDuration,
+          ])
 
           setAnswer((current) =>
             current.trim()
@@ -292,6 +303,7 @@ function App() {
       }
 
       mediaRecorderRef.current = recorder
+      recordingStartedAtRef.current = performance.now()
       recorder.start()
 
       setIsRecording(true)
@@ -406,6 +418,7 @@ function App() {
     setInterviewError('')
     setFeedback(null)
     setVoiceTranscripts([])
+    setVoiceRecordingDurations([])
     setVoiceError('')
     setIsTranscribing(false)
     setRecordingSeconds(0)
@@ -422,6 +435,7 @@ function App() {
     setInterviewLoading(true)
     setInterviewError('')
     setVoiceTranscripts([])
+    setVoiceRecordingDurations([])
 
     try {
       const result = await startInterview(interviewRole.trim())
@@ -902,6 +916,24 @@ function App() {
   }
     function renderFeedback() {
     const fillerAnalysis = analyzeFillerWords(voiceTranscripts)
+    const spokenWordCount = voiceTranscripts.reduce((total, transcript) => {
+      const words = transcript.trim().match(/\b[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)?\b/gu)
+      return total + (words ? words.length : 0)
+    }, 0)
+    const totalRecordingSeconds = voiceRecordingDurations.reduce(
+      (total, duration) => total + duration,
+      0
+    )
+    const wordsPerMinute = totalRecordingSeconds > 0
+      ? Math.round((spokenWordCount / totalRecordingSeconds) * 60)
+      : 0
+    const speakingPace = wordsPerMinute === 0
+      ? 'Not available'
+      : wordsPerMinute < 110
+        ? 'Slower pace'
+        : wordsPerMinute <= 160
+          ? 'Conversational pace'
+          : 'Faster pace'
 
     if (interviewLoading) {
       return (
@@ -1045,6 +1077,55 @@ function App() {
               or “I mean”, can be meaningful depending on context. Use the
               count as a practice signal, not as a judgment of your speaking
               ability.
+            </p>
+          </section>
+
+          <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-indigo-600">
+                  Delivery
+                </p>
+                <h2 className="mt-2 text-xl font-bold text-slate-900">
+                  Speaking pace
+                </h2>
+                <p className="mt-1 text-sm leading-6 text-slate-500">
+                  Estimated from transcribed words and the time spent recording voice answers.
+                </p>
+              </div>
+              {voiceTranscripts.length > 0 && totalRecordingSeconds > 0 && (
+                <div className="min-w-28 rounded-xl bg-indigo-50 px-5 py-3 text-center">
+                  <p className="text-3xl font-bold text-indigo-700">
+                    {wordsPerMinute}
+                  </p>
+                  <p className="text-xs font-semibold text-indigo-600">words / min</p>
+                </div>
+              )}
+            </div>
+
+            {voiceTranscripts.length === 0 || totalRecordingSeconds <= 0 ? (
+              <p className="mt-5 rounded-xl bg-slate-50 px-4 py-4 text-sm text-slate-600">
+                Speaking pace is unavailable because no completed voice recordings were measured.
+              </p>
+            ) : (
+              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-xl bg-slate-50 p-4">
+                  <p className="text-xs font-semibold text-slate-500">Spoken words</p>
+                  <p className="mt-1 text-2xl font-bold text-slate-900">{spokenWordCount}</p>
+                </div>
+                <div className="rounded-xl bg-slate-50 p-4">
+                  <p className="text-xs font-semibold text-slate-500">Recording time</p>
+                  <p className="mt-1 text-2xl font-bold text-slate-900">{Math.round(totalRecordingSeconds)}s</p>
+                </div>
+                <div className="rounded-xl bg-slate-50 p-4">
+                  <p className="text-xs font-semibold text-slate-500">Estimated pace</p>
+                  <p className="mt-1 text-lg font-bold text-indigo-700">{speakingPace}</p>
+                </div>
+              </div>
+            )}
+
+            <p className="mt-4 text-xs leading-5 text-slate-400">
+              This is an approximate average across your recordings. Pauses and silence during recording are included, so it is not a precise measure of continuous speech speed.
             </p>
           </section>
 
