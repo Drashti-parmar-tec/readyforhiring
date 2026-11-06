@@ -1,201 +1,170 @@
-# PROGRESS.md — ReadyForHiring
+# ReadyForHiring — Project Progress
 
-> Keep this file in the repo root. Update it at the end of every work session.
-> At the start of a new chat, paste the "Current status" section and the phase you are working on.
+Last updated: 6 November 2026
 
----
+## 1. Current Status
 
+**Project:** ReadyForHiring  
+**Project type:** AI-powered international career development platform  
+**Current phase:** Phase 6 — AI Interview  
+**Current milestone:** Text Interview frontend and backend integration  
+**Development status:** Working locally; changes not yet committed.
 
-## Current status
+### Completed recently
+- Full-screen AI Interview Studio.
+- Job role selection.
+- Six-question AI-generated interview.
+- Text answer submission.
+- AI-generated performance feedback.
+- Interview score, strengths and improvements displayed.
+- Interview data and feedback saved in Neon PostgreSQL.
+- Frontend and backend integration tested successfully.
 
-- **Date last updated:** 2026-11-05
-- **Current phase:** Phase 5 — Frontend skeleton + deploy
-- **Last thing finished:** Phase 4 — Career Discovery (commit `065f6e6`)
-- **Next step:** Create the React + Vite + Tailwind frontend
-- **Blocked by:** Nothing
+## 2. Technology Stack
 
+| Component | Technology |
+|---|---|
+| Frontend | React, Vite, Tailwind CSS |
+| Backend | Python 3.12, FastAPI |
+| AI | Groq |
+| Database | Neon PostgreSQL |
+| Backend hosting | Render |
+| Frontend hosting | Vercel |
+| Version control | GitHub |
 
----
+## 3. Development Phase Checklist
 
-## Phase checklist
+### Phase 1 — Backend Foundation
+- [x] Project structure
+- [x] FastAPI application
+- [x] Health endpoint
+- [x] Local backend testing
+- [x] Render deployment
 
-Tick a box only when the step **works** and is **committed**.
-
-### Phase 0 — Setup
-- [x] Install VS Code, Git, Node 20+, and `uv`
-- [x] Create GitHub repo `readyforhiring`
-- [x] Create folders `backend` and `frontend`
-- [x] Pin Python 3.12 with `uv` and create `backend/pyproject.toml`
-- [x] Add `.gitignore` (includes `.env`, `.venv`, `node_modules`)
-- [x] First commit pushed to GitHub
-
-### Phase 1 — Backend skeleton + early deploy
-
-- [x] FastAPI app with `GET /health`
-- [x] Run locally and open `/docs`
-- [x] Add `ruff` and run `uv run ruff check --fix`
-- [x] Add automated health endpoint test with Pytest
-- [x] Deploy backend to Render (free)
-- [x] `/health` works on the Render link
-
-### Phase 2 — Groq connection
-
-- [x] Get free Groq API key and save it in `backend/.env`
-- [x] `config.py` reads environment variables
-- [x] `groq_client.py` makes one test chat call
-- [x] Retry on rate-limit error
-- [x] Automated retry test passes
+### Phase 2 — AI Integration
+- [x] Groq API integration
+- [x] Environment-based model configuration
+- [x] Rate-limit retry handling
+- [x] AI response validation
 
 ### Phase 3 — Database
-- [x] Create Neon project and copy `DATABASE_URL`
-- [x] `db.py` and `models.py` created
-- [x] Tables created on startup
-- [x] One test row saved and read back
-
+- [x] Neon PostgreSQL connection
+- [x] SQLAlchemy models
+- [x] Database table creation
+- [x] Database CRUD testing
 
 ### Phase 4 — Career Discovery
-- [x] `careers.json` with starter careers and skills
-- [x] Career prompt returns valid JSON
-- [x] `POST /api/career/discover` works in `/docs`
-- [x] Result saved to database
+- [x] Career recommendation service
+- [x] AI-generated career recommendations
+- [x] Skill matching and skill gaps
+- [x] Save results in Neon
+- [x] Frontend integration
+- [x] Production verification
 
+### Phase 5 — Frontend Foundation
+- [x] React and Vite setup
+- [x] Tailwind CSS
+- [x] Dashboard layout
+- [x] Sidebar navigation
+- [x] Theme settings
+- [x] Career Discovery interface
+- [x] Vercel deployment
 
-### Phase 5 — Frontend skeleton + deploy
-- [x] React + Vite + Tailwind project created
-- [x] Home page and Career Discovery page
-- [x] `lib/api.js` calls the backend
-- [x] CORS works between frontend and backend
-- [ ] Deploy frontend to Vercel
+### Phase 6 — AI Text Interview
+- [x] Interview question prompt
+- [x] Interview question service
+- [x] Interview API endpoints
+- [x] Six-question interview flow
+- [x] Interview answer storage
+- [x] AI feedback generation
+- [x] Feedback storage in Neon
+- [x] Full-screen interview interface
+- [x] Frontend API integration
+- [x] Real end-to-end interview test
+- [x] Feedback screen
+- [x] Backend tests — 21 passed
+- [x] Ruff checks passed
+- [x] Frontend production build passed
+- [ ] Final Git review and commit
 
-### Phase 6 — Text interview + feedback (STAR FEATURE)
-- [ ] Interviewer prompt
-- [ ] `POST /api/interview/start`
-- [ ] `POST /api/interview/{id}/answer` (follow-up questions)
-- [ ] Evaluator prompt returns valid JSON scores
-- [ ] `POST /api/interview/{id}/finish`
-- [ ] Interview page in the frontend (text only)
+**Note:** Text Interview has passed local testing. Phase 6 is not yet committed.
 
-### Phase 7 — Voice + avatar
-- [ ] Mic recording in the browser
-- [ ] `POST /api/speech/transcribe` with Groq Whisper
-- [ ] Browser speaks questions with `speechSynthesis`
-- [ ] Filler word count and words per minute
-- [ ] Simple 2D animated avatar
+### Phase 7 — Live Camera and Voice Interview
+- [ ] Interview camera interface
+- [ ] Browser camera permission handling
+- [ ] Live camera preview
+- [ ] Spoken AI questions
+- [ ] Voice answer recording
+- [ ] Groq Whisper transcription
+- [ ] Voice interview testing
+- [ ] Voice interview feedback
 
-### Phase 8 — Dashboard
-- [ ] `GET /api/dashboard/{user_id}`
-- [ ] Score history chart
-- [ ] Latest feedback card
+### Phase 8 — Resume Analysis
+- [ ] Resume upload
+- [ ] PDF text extraction
+- [ ] AI resume analysis
+- [ ] Skill gap detection
+- [ ] Resume improvement suggestions
+- [ ] Save resume reports
 
-### Phase 9 — Resume + skill gap
-- [ ] PDF text extraction with `pypdf`
-- [ ] Resume analysis prompt
-- [ ] Skill gap list and simple learning plan
-- [ ] Resume page in the frontend
+### Phase 9 — AI Career Assistant
+- [ ] AI career chat
+- [ ] Career-related questions
+- [ ] Context-aware recommendations
+- [ ] Chat history storage
 
-### Phase 10 — Chatbot + Money Planner
-- [ ] `POST /api/chat`
-- [ ] Salary ranges in `careers.json` (mark as sample estimates)
-- [ ] `POST /api/finance/plan` (savings math in plain code)
-- [ ] Money page in the frontend
+### Phase 10 — Dashboard and Integration
+- [ ] Real career match statistics
+- [ ] Interview history
+- [ ] Interview scores
+- [ ] Resume analysis history
+- [ ] Career progress tracking
+- [ ] Connect all features
 
-### Phase 11 — Polish and demo
-- [ ] Friendly error messages and "waking up the server" message
-- [ ] README with setup steps and screenshots
-- [ ] Wake Render and Neon before the demo
-- [ ] Demo script and 2-minute demo video
-- [ ] Final check of all free-tier limits
+### Phase 11 — Final Testing and Deployment
+- [ ] Complete backend testing
+- [ ] Complete frontend testing
+- [ ] Responsive mobile design
+- [ ] Production environment verification
+- [ ] Error handling review
+- [ ] Security review
+- [ ] Final Vercel deployment
+- [ ] Final Render deployment
+- [ ] Competition demo preparation
 
----
+## 4. Product Decisions
 
-## Decisions log
+| Decision | Reason |
+|---|---|
+| Remove Money Planner | Not essential to the core career platform |
+| Text Interview first | Easier to implement and test reliably |
+| Camera and voice later | Adds complexity and requires separate testing |
+| International audience | Platform should support users beyond one country |
+| Free tools and services | Keep project costs at zero |
+| Prioritize AI Interview | It is the platform's star feature |
 
-| Date    | Decision               | Why |
-|---      |---                     |---  |
-| (start) | FastAPI + React (Vite) | Simple for beginners, clear to explain |
-| (start) | Groq for LLM and Whisper | Free tier, fast |
-| (start) | Neon Postgres, not SQLite | Render free disk is wiped on restart |
-| (start) | No login in version 1 | Keep scope small; random user id in browser |
-| (start) | Browser `speechSynthesis` for voice out | Free, no server work |
-| (start) | 2D avatar first, 3D only if time | Lower risk |
+## 5. Known Limitations
 
----
+- Camera and voice interview are not implemented yet.
+- Interview question diversity needs improvement.
+- Login and proper authentication are not implemented.
+- Dashboard statistics are currently placeholders.
+- Resume Analysis and AI Career Assistant are not implemented.
+- The current career catalog contains eight starter careers.
 
-## Bugs and fixes
+## 6. Next Development Step
 
-| Date | Problem | Fix | Lesson |
-|---|---|---|---|
-| | | | |
+**Immediate task:** Review the pending Phase 6 changes, update this tracker, run final checks, and commit the Text Interview milestone to GitHub.
 
----
+After that, begin Phase 7: Live Camera and Voice Interview.
 
-## Session log
+## 7. Development Notes
 
-### Session 1 — Project Setup and Backend Foundation
-- Goal: Initialize ReadyForHiring and establish the backend foundation.
-- Done:
-  - Created GitHub repository `readyforhiring`.
-  - Set up project folders for backend and frontend.
-  - Installed and configured Python 3.12, `uv`, and Git.
-  - Created backend `pyproject.toml` and dependency configuration.
-  - Added `.gitignore` to protect environment files and generated folders.
-  - Created FastAPI application.
-  - Implemented `GET /health` endpoint.
-  - Configured Swagger documentation at `/docs`.
-  - Added automated health endpoint test using Pytest.
-  - Configured Ruff for code quality.
-  - Deployed backend to Render free service.
-  - Verified the deployed `/health` endpoint successfully.
-  - Pushed backend foundation to GitHub.
-- Not done:
-  - Groq integration.
-  - Database setup.
-  - Frontend development.
-  - AI feature implementation.
-- Next: Configure Groq API and implement the AI connection.
-
-### Session 2 — 2026-11-05
-- Goal: Complete Groq integration.
-- Done: Configured Groq, tested a real API request, implemented rate-limit retry, added automated retry test. Ruff checks passed; Pytest: 2 passed.
-- Not done: Database setup.
-- Next: Phase 3 — Neon PostgreSQL.
-
-### Session 3 — Neon PostgreSQL Database Integration
-
-**Completed:**
-- Created Neon PostgreSQL project using the Free plan.
-- Configured `DATABASE_URL` and `DATABASE_URL_POOLED` in `backend/.env`.
-- Verified `.env` is ignored by Git.
-- Created `backend/app/db.py` using SQLAlchemy 2.0 and psycopg.
-- Successfully connected FastAPI backend to Neon PostgreSQL.
-- Created six database models in `backend/app/models.py`.
-- Configured automatic table creation using FastAPI lifespan.
-- Successfully created all six tables in Neon.
-- Created `backend/tests/test_database.py`.
-- Successfully tested database insert, read and delete operations.
-
-**Testing results:**
-- Database test: PASSED
-- Groq retry test: PASSED
-- Health endpoint test: PASSED
-- Total: 3 tests passed.
-- Ruff lint: PASSED.
-- Ruff formatting: PASSED.
-
-
-### Career Discovery completion — November 5, 2026
-- **Goal:** Build the Career Discovery backend feature.
-- **Done:** Career catalog, AI prompt, Pydantic schemas, Groq service, retry handling, FastAPI endpoint, Neon persistence, and automated tests.
-- **Testing:** 9 automated tests passed. Real Groq request succeeded. Swagger returned HTTP 200. Neon database save verified.
-- **Commit:** `065f6e6` — Complete Career Discovery feature.
-- **Not done:** Frontend development.
-- **Next:** Phase 5 — Frontend skeleton + deploy.
-
-### Career Discovery Completion — November 5, 2026
-
-- Goal: Build the Career Discovery backend feature.
-- Done: Career catalog, AI prompt, Pydantic schemas, Groq service, retry handling, FastAPI endpoint, and Neon database persistence.
-- Testing: 9 automated tests passed.
-- Manual verification: Real Groq request succeeded, Swagger returned HTTP 200, and Neon database save was confirmed.
-- Commit: `065f6e6` — Complete Career Discovery feature.
-- Next: Phase 5 — Frontend skeleton + deploy.
+- Never commit `.env` files or API keys.
+- Run backend tests before committing.
+- Run Ruff before committing.
+- Run frontend production build before committing.
+- Test actual API functionality, not only the UI.
+- Update this file after each completed milestone.
+- Follow `Architecture.md` for technical decisions.
+- Follow `Project-Instructions.md` for development workflow.

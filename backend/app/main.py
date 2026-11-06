@@ -8,13 +8,12 @@ from app import models  # noqa: F401
 from app.config import get_settings
 from app.db import Base, engine
 from app.routers.career import router as career_router
+from app.routers.interview import router as interview_router
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Create database tables when the application starts.
-    """
+    """Create database tables when the application starts."""
     Base.metadata.create_all(bind=engine)
     yield
 
@@ -48,11 +47,10 @@ app.add_middleware(
 )
 
 app.include_router(career_router)
+app.include_router(interview_router)
 
 
 @app.get("/health", tags=["Health"])
 async def health_check() -> dict[str, str]:
-    """
-    Check whether the ReadyForHiring backend is running.
-    """
+    """Check whether the ReadyForHiring backend is running."""
     return {"status": "ok"}

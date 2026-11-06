@@ -51,6 +51,7 @@ async function apiRequest(endpoint, options = {}) {
   return data
 }
 
+// Career Discovery
 export function discoverCareers({ interests, skills }) {
   return apiRequest('/api/career/discover', {
     method: 'POST',
@@ -58,6 +59,40 @@ export function discoverCareers({ interests, skills }) {
       user_id: getUserId(),
       interests,
       skills,
+    }),
+  })
+}
+
+// Start an AI interview
+export function startInterview(role) {
+  return apiRequest('/api/interview/start', {
+    method: 'POST',
+    body: JSON.stringify({
+      user_id: getUserId(),
+      role,
+    }),
+  })
+}
+
+// Submit an interview answer
+export function submitInterviewAnswer({ interviewId, answer }) {
+  return apiRequest('/api/interview/answer', {
+    method: 'POST',
+    body: JSON.stringify({
+      user_id: getUserId(),
+      interview_id: interviewId,
+      answer,
+    }),
+  })
+}
+
+// Generate and retrieve interview feedback
+export function getInterviewFeedback(interviewId) {
+  return apiRequest('/api/interview/feedback', {
+    method: 'POST',
+    body: JSON.stringify({
+      user_id: getUserId(),
+      interview_id: interviewId,
     }),
   })
 }
